@@ -1,24 +1,101 @@
+//
+//package com.flywheel.repository.impl;
+//
+//import com.flywheel.constant.DisputeQueryConstants;
+//import com.flywheel.repository.TotalDisputedRepository;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+//import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+//import org.springframework.stereotype.Repository;
+//
+//import java.util.Date;
+//
+//@Repository
+//public class TotalDisputedRepositoryImpl implements TotalDisputedRepository {
+//
+//    @Autowired
+//    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+//
+//    @Override
+//    public Double getTotalDisputedAmount(
+//        Long agreementId,
+//        String agreementTitle,
+//        String disputeReason,
+//        String vendorCode,
+//        String invoiceNumber,
+//        String po,
+//        String asin,
+//        String businessUnitId,
+//        Date startDate,
+//        Date endDate) {
+//
+//        // Start with the base query
+//        StringBuilder query = new StringBuilder(DisputeQueryConstants.BASE_QUERY);
+//
+//        // Add filters conditionally
+//        MapSqlParameterSource parameters = new MapSqlParameterSource();
+//        parameters.addValue("businessUnitId", businessUnitId);
+//        parameters.addValue("startDate", new java.sql.Date(startDate.getTime()));
+//        parameters.addValue("endDate", new java.sql.Date(endDate.getTime()));
+//
+//        if (agreementId != null) {
+//            query.append(DisputeQueryConstants.AGREEMENT_ID_FILTER);
+//            parameters.addValue("agreementId", agreementId);
+//        }
+//        if (agreementTitle != null && !agreementTitle.isEmpty()) {
+//            query.append(DisputeQueryConstants.AGREEMENT_TITLE_FILTER);
+//            parameters.addValue("agreementTitle", agreementTitle);
+//        }
+//        if (disputeReason != null && !disputeReason.isEmpty()) {
+//            query.append(DisputeQueryConstants.DISPUTE_REASON_FILTER);
+//            parameters.addValue("disputeReason", disputeReason);
+//        }
+//        if (vendorCode != null && !vendorCode.isEmpty()) {
+//            query.append(DisputeQueryConstants.VENDOR_CODE_FILTER);
+//            parameters.addValue("vendorCode", vendorCode);
+//        }
+//        if (invoiceNumber != null && !invoiceNumber.isEmpty()) {
+//            query.append(DisputeQueryConstants.INVOICE_NUMBER_FILTER);
+//            parameters.addValue("invoiceNumber", invoiceNumber);
+//        }
+//        if (po != null && !po.isEmpty()) {
+//            query.append(DisputeQueryConstants.PO_FILTER);
+//            parameters.addValue("po", po);
+//        }
+//        if (asin != null && !asin.isEmpty()) {
+//            query.append(DisputeQueryConstants.ASIN_FILTER);
+//            parameters.addValue("asin", asin);
+//        }
+//
+//        // Execute the query
+//        return namedParameterJdbcTemplate.queryForObject(query.toString(), parameters, Double.class);
+//    }
+//}
 
 package com.flywheel.repository.impl;
 
+import com.flywheel.constant.DisputeQueryConstants;
 import com.flywheel.repository.TotalDisputedRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 @Repository
 public class TotalDisputedRepositoryImpl implements TotalDisputedRepository {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    @SuppressWarnings("deprecation")
-	@Override
+    @Autowired
+    public TotalDisputedRepositoryImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    }
+
+    @Override
     public Double getTotalDisputedAmount(
         Long agreementId,
         String agreementTitle,
@@ -30,98 +107,71 @@ public class TotalDisputedRepositoryImpl implements TotalDisputedRepository {
         String businessUnitId,
         Date startDate,
         Date endDate) {
+    	
+    	 /*  The method starts with a base query (DisputeQueryConstants.BASE_QUERY) 
+         * and adds dynamic conditions based on the optional filters like agreementId, 
+         * agreementTitle, disputeReason, etc.*/
 
-        // Base SQL query
-        String sql = "SELECT SUM(dm.TOTAL_DISPUTED_AMOUNT) AS totalDisputedAmount " +
-                     "FROM DISPUTE_MANAGEMENT dm " +
-                     "JOIN VW_ACCOUNT_MAPPING v ON dm.VC_ACCOUNT_ID = v.VC_ACCOUNT_ID " +
-                     "WHERE v.BUSINESS_UNIT_ID = ? " +
-                     "AND dm.DISPUTE_DATE BETWEEN ? AND ? " +
-                     "AND dm.DISPUTE_TYPE = 'co-op' ";
+        StringBuilder query = new StringBuilder(DisputeQueryConstants.BASE_QUERY);
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        
+       // These parameters are part of the mandatory filters
+        
+        parameters.addValue("businessUnitId", businessUnitId);
+        parameters.addValue("startDate", new java.sql.Date(startDate.getTime()));
+        parameters.addValue("endDate", new java.sql.Date(endDate.getTime()));
+        
+        
+        /* Adds parameters: For each condition, it uses the helper method 
+         * addFilterCondition to append the query and map the filter values 
+         * to query parameters.*/
+        
 
-        // StringBuilder to append dynamic filters
-        StringBuilder filterQuery = new StringBuilder();
+        addFilterCondition(query, parameters, agreementId,
+                () -> DisputeQueryConstants.AGREEMENT_ID_FILTER, "agreementId");
 
-        if (agreementId != null) {
-            filterQuery.append("AND dm.AGREEMENT_ID = ? ");
-        }
-        if (agreementTitle != null) {
-            filterQuery.append("AND dm.AGREEMENT_TITLE LIKE ? ");
-        }
-        if (disputeReason != null) {
-            filterQuery.append("AND dm.DISPUTE_REASON LIKE ? ");
-        }
-        if (vendorCode != null) {
-            filterQuery.append("AND dm.VENDOR_CODE LIKE ? ");
-        }
-        if (invoiceNumber != null) {
-            filterQuery.append("AND dm.INVOICE_NUMBER = ? ");
-        }
-        if (po != null) {
-            filterQuery.append("AND dm.PURCHASE_ORDER = ? ");
-        }
-        if (asin != null) {
-            filterQuery.append("AND dm.ASIN = ? ");
-        }
+        addFilterCondition(query, parameters, agreementTitle,
+                () -> DisputeQueryConstants.AGREEMENT_TITLE_FILTER, "agreementTitle");
 
-        // Combine the base SQL query with dynamic filters
-        sql += filterQuery.toString();
+        addFilterCondition(query, parameters, disputeReason,
+                () -> DisputeQueryConstants.DISPUTE_REASON_FILTER, "disputeReason");
 
-        // Dynamically build the parameters array
-        Object[] params = buildQueryParameters(agreementId, agreementTitle, disputeReason, vendorCode, invoiceNumber, po, asin, businessUnitId, startDate, endDate);
+        addFilterCondition(query, parameters, vendorCode,
+                () -> DisputeQueryConstants.VENDOR_CODE_FILTER, "vendorCode");
 
-        // Execute the query and retrieve the result
-        return jdbcTemplate.queryForObject(sql, params, Double.class);
+        addFilterCondition(query, parameters, invoiceNumber,
+                () -> DisputeQueryConstants.INVOICE_NUMBER_FILTER, "invoiceNumber");
+
+        addFilterCondition(query, parameters, po,
+                () -> DisputeQueryConstants.PO_FILTER, "po");
+
+        addFilterCondition(query, parameters, asin,
+                () -> DisputeQueryConstants.ASIN_FILTER, "asin");
+
+        
+        /* Executes the query: After building the query string,
+         *  it calls namedParameterJdbcTemplate.queryForObject to 
+         *  execute the query and return the result as a Double 
+         *  (the total disputed amount).*/
+        
+        // Execute the query
+        return namedParameterJdbcTemplate.queryForObject(query.toString(), parameters, Double.class);
     }
 
-    // Helper method to build query parameters array
-    private Object[] buildQueryParameters(
-        Long agreementId,
-        String agreementTitle,
-        String disputeReason,
-        String vendorCode,
-        String invoiceNumber,
-        String po,
-        String asin,
-        String businessUnitId,
-        Date startDate,
-        Date endDate) {
-
-        // Initialize an array for the parameters
-        Object[] baseParams = new Object[]{
-            businessUnitId,
-            new java.sql.Date(startDate.getTime()),
-            new java.sql.Date(endDate.getTime())
-        };
-
-        // Initialize a list to hold all the parameters
-        List<Object> paramsList = new ArrayList<>(Arrays.asList(baseParams));
-
-        // Add optional filters to the parameters list
-        if (agreementId != null) {
-            paramsList.add(agreementId);
-        }
-        if (agreementTitle != null) {
-            paramsList.add("%" + agreementTitle + "%");
-        }
-        if (disputeReason != null) {
-            paramsList.add("%" + disputeReason + "%");
-        }
-        if (vendorCode != null) {
-            paramsList.add("%" + vendorCode + "%");
-        }
-        if (invoiceNumber != null) {
-            paramsList.add(invoiceNumber);
-        }
-        if (po != null) {
-            paramsList.add(po);
-        }
-        if (asin != null) {
-            paramsList.add(asin);
-        }
-
-        // Convert the list back to an array
-        return paramsList.toArray();
+    private void addFilterCondition(StringBuilder query, MapSqlParameterSource parameters, Object filterValue,
+                                    Supplier<String> queryBuilderFunction, String param) {
+        Optional.ofNullable(filterValue).filter(value -> value instanceof String ? !((String) value).isEmpty() : true)
+                .ifPresent(value -> {
+                    query.append(queryBuilderFunction.get());
+                    parameters.addValue(param, value);
+                });
     }
 }
 
+
+/* The repository implementation uses SQL queries to 
+ * interact with the database directly. The NamedParameterJdbcTemplate 
+ * is used to execute queries with named parameters.
+In your TotalDisputedRepositoryImpl class, you dynamically 
+build the SQL query with optional filters and execute it to 
+fetch the total disputed amount.*/

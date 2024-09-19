@@ -1,83 +1,157 @@
-package com.flywheel.repository.impl;
-
-import com.flywheel.repository.TotalInvoiceRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-@Repository
-public class TotalInvoiceRepositoryImpl implements TotalInvoiceRepository {
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @SuppressWarnings("deprecation")
-	@Override
-    public Double getTotalInvoiceAmount(
-        Long agreementId,
-        String agreementTitle,
-        String disputeReason,
-        String vendorCode,
-        String invoiceNumber,
-        String po,
-        String asin,
-        String businessUnitId,
-        Date startDate,
-        Date endDate) {
-
-        // Base SQL query
-        StringBuilder sql = new StringBuilder(
-            "SELECT SUM(c.NET_RECEIPTS) AS total_invoice_amount " +
-            "FROM FLYWHEEL_DEV.SUPPLY_CHAIN.CO_OP_GOLD c " +
-            "JOIN FLYWHEEL_DEV.SUPPLY_CHAIN.VW_ACCOUNT_MAPPING vwm ON c.AGREEMENT_ID = vwm.VC_ACCOUNT_ID " +
-            "LEFT JOIN FLYWHEEL_DEV.SUPPLY_CHAIN.DISPUTE_MANAGEMENT dm ON c.INVOICE_NUMBER = dm.INVOICE_NUMBER " +
-            "WHERE vwm.BUSINESS_UNIT_ID = ? " +
-            "AND dm.DISPUTE_TYPE = 'co-op' " +
-            "AND dm.DISPUTE_DATE BETWEEN ? AND ? "
-        );
-
-        // List of query parameters
-        List<Object> params = new ArrayList<>();
-        params.add(businessUnitId);
-        params.add(startDate);
-        params.add(endDate);
-
-        // Append filters to the query based on input parameters
-        if (agreementId != null) {
-            sql.append("AND c.AGREEMENT_ID = ? ");
-            params.add(agreementId);
-        }
-        if (agreementTitle != null && !agreementTitle.isEmpty()) {
-            sql.append("AND c.AGREEMENT_TITLE = ? ");
-            params.add(agreementTitle);
-        }
-        if (disputeReason != null && !disputeReason.isEmpty()) {
-            sql.append("AND dm.DISPUTE_REASON = ? ");
-            params.add(disputeReason);
-        }
-        if (vendorCode != null && !vendorCode.isEmpty()) {
-            sql.append("AND c.VENDOR_CODE = ? ");
-            params.add(vendorCode);
-        }
-        if (invoiceNumber != null && !invoiceNumber.isEmpty()) {
-            sql.append("AND c.INVOICE_NUMBER = ? ");
-            params.add(invoiceNumber);
-        }
-        if (po != null && !po.isEmpty()) {
-            sql.append("AND c.PURCHASE_ORDER = ? ");
-            params.add(po);
-        }
-        if (asin != null && !asin.isEmpty()) {
-            sql.append("AND c.ASIN = ? ");
-            params.add(asin);
-        }
-
-        // Execute the query and return the total invoice amount
-        return jdbcTemplate.queryForObject(sql.toString(), params.toArray(), Double.class);
-    }
-}
-
+////package com.flywheel.repository.impl;
+////
+////import com.flywheel.constant.InvoiceQueryConstants;
+////import com.flywheel.repository.TotalInvoiceRepository;
+////import org.springframework.beans.factory.annotation.Qualifier;
+////import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+////import org.springframework.stereotype.Repository;
+////
+////import java.util.Date;
+////import java.util.HashMap;
+////import java.util.Map;
+////
+////@Repository
+////public class TotalInvoiceRepositoryImpl implements TotalInvoiceRepository {
+////
+////    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+////    public TotalInvoiceRepositoryImpl(
+////            @Qualifier("defaultJdbcTemplate") NamedParameterJdbcTemplate namedParameterJdbcTemplate,
+////            @Qualifier("snowflakeJdbcTemplate") NamedParameterJdbcTemplate snowflakeNamedJdbcTemplate) {
+////        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+////    }
+////
+////    @Override
+////    public Double getTotalInvoiceAmount(
+////        Long agreementId,
+////        String agreementTitle,
+////        String disputeReason,
+////        String vendorCode,
+////        String invoiceNumber,
+////        String po,
+////        String asin,
+////        String businessUnitId,
+////        Date startDate,
+////        Date endDate) {
+////
+////        // Base SQL query with mandatory filters
+////        StringBuilder sql = new StringBuilder(InvoiceQueryConstants.TOTAL_INVOICE_BASE_QUERY);
+////
+////        // Map to hold query parameters
+////        Map<String, Object> params = new HashMap<>();
+////        params.put("businessUnitId", businessUnitId);
+////        params.put("startDate", new java.sql.Date(startDate.getTime()));
+////        params.put("endDate", new java.sql.Date(endDate.getTime()));
+////
+////        // Append optional filters to the SQL query and parameters map
+////        if (agreementId != null) {
+////            sql.append(InvoiceQueryConstants.AGREEMENT_ID_FILTER);
+////            params.put("agreementId", agreementId);
+////        }
+////        if (agreementTitle != null && !agreementTitle.isEmpty()) {
+////            sql.append(InvoiceQueryConstants.AGREEMENT_TITLE_FILTER);
+////            params.put("agreementTitle", agreementTitle);
+////        }
+////        if (disputeReason != null && !disputeReason.isEmpty()) {
+////            sql.append(InvoiceQueryConstants.DISPUTE_REASON_FILTER);
+////            params.put("disputeReason", disputeReason);
+////        }
+////        if (vendorCode != null && !vendorCode.isEmpty()) {
+////            sql.append(InvoiceQueryConstants.VENDOR_CODE_FILTER);
+////            params.put("vendorCode", vendorCode);
+////        }
+////        if (invoiceNumber != null && !invoiceNumber.isEmpty()) {
+////            sql.append(InvoiceQueryConstants.INVOICE_NUMBER_FILTER);
+////            params.put("invoiceNumber", invoiceNumber);
+////        }
+////        if (po != null && !po.isEmpty()) {
+////            sql.append(InvoiceQueryConstants.PO_FILTER);
+////            params.put("po", po);
+////        }
+////        if (asin != null && !asin.isEmpty()) {
+////            sql.append(InvoiceQueryConstants.ASIN_FILTER);
+////            params.put("asin", asin);
+////        }
+////
+////        // Execute the query and retrieve the result
+////        return namedParameterJdbcTemplate.queryForObject(sql.toString(), params, Double.class);
+////    }
+////}
+//
+//package com.flywheel.repository.impl;
+//
+//import com.flywheel.constant.InvoiceQueryConstants;
+//import com.flywheel.repository.TotalInvoiceRepository;
+//import org.springframework.beans.factory.annotation.Qualifier;
+//import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+//import org.springframework.stereotype.Repository;
+//
+//import java.util.Date;
+//import java.util.HashMap;
+//import java.util.Map;
+//
+//@Repository
+//public class TotalInvoiceRepositoryImpl implements TotalInvoiceRepository {
+//
+//    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+//
+//    public TotalInvoiceRepositoryImpl(
+//            @Qualifier("defaultJdbcTemplate") NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+//        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+//    }
+//
+//    @Override
+//    public Double getTotalInvoiceAmount(
+//        Long agreementId,
+//        String agreementTitle,
+//        String disputeReason,
+//        String vendorCode,
+//        String invoiceNumber,
+//        String po,
+//        String asin,
+//        String businessUnitId,
+//        Date startDate,
+//        Date endDate) {
+//
+//        // Base SQL query with mandatory filters
+//        StringBuilder sql = new StringBuilder(InvoiceQueryConstants.TOTAL_INVOICE_BASE_QUERY);
+//
+//        // Map to hold query parameters
+//        Map<String, Object> params = new HashMap<>();
+//        params.put("businessUnitId", businessUnitId);
+//        params.put("startDate", new java.sql.Date(startDate.getTime()));
+//        params.put("endDate", new java.sql.Date(endDate.getTime()));
+//
+//        // Append optional filters to the SQL query and parameters map
+//        if (agreementId != null) {
+//            sql.append(InvoiceQueryConstants.AGREEMENT_ID_FILTER);
+//            params.put("agreementId", agreementId);
+//        }
+//        if (agreementTitle != null && !agreementTitle.isEmpty()) {
+//            sql.append(InvoiceQueryConstants.AGREEMENT_TITLE_FILTER);
+//            params.put("agreementTitle", agreementTitle);
+//        }
+//        if (disputeReason != null && !disputeReason.isEmpty()) {
+//            sql.append(InvoiceQueryConstants.DISPUTE_REASON_FILTER);
+//            params.put("disputeReason", disputeReason);
+//        }
+//        if (vendorCode != null && !vendorCode.isEmpty()) {
+//            sql.append(InvoiceQueryConstants.VENDOR_CODE_FILTER);
+//            params.put("vendorCode", vendorCode);
+//        }
+//        if (invoiceNumber != null && !invoiceNumber.isEmpty()) {
+//            sql.append(InvoiceQueryConstants.INVOICE_NUMBER_FILTER);
+//            params.put("invoiceNumber", invoiceNumber);
+//        }
+//        if (po != null && !po.isEmpty()) {
+//            sql.append(InvoiceQueryConstants.PO_FILTER);
+//            params.put("po", po);
+//        }
+//        if (asin != null && !asin.isEmpty()) {
+//            sql.append(InvoiceQueryConstants.ASIN_FILTER);
+//            params.put("asin", asin);
+//        }
+//
+//        // Execute the query and retrieve the result
+//        return namedParameterJdbcTemplate.queryForObject(sql.toString(), params, Double.class);
+//    }
+//}

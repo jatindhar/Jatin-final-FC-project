@@ -1,0 +1,17 @@
+{"properties": [
+  {
+    "name": "spring.jdbc.template.named-parameter-enabled",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.jdbc.template.named-parameter-enabled'"
+  },
+  {
+    "name": "spring.datasource.initialize",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.initialize'"
+  },
+  {
+    "name": "spring.datasource.initialize",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.initialize'"
+  }
+]}

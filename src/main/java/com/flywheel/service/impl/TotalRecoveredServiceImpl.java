@@ -36,4 +36,3 @@ public class TotalRecoveredServiceImpl implements TotalRecoveredService {
         );
     }
 }
-

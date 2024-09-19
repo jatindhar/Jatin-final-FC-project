@@ -1,24 +1,192 @@
+//package com.flywheel.repository.impl;
+//
+//import com.flywheel.constant.RecoveryQueryConstants;
+//import com.flywheel.repository.TotalRecoveredRepository;
+//
+//import org.springframework.beans.factory.annotation.Qualifier;
+//import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+//import org.springframework.stereotype.Repository;
+//
+//import java.util.Date;
+//import java.util.HashMap;
+//import java.util.Map;
+//
+//@Repository
+//public class TotalRecoveredRepositoryImpl implements TotalRecoveredRepository {
+//
+//    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+//
+//    public TotalRecoveredRepositoryImpl(@Qualifier("${spring.datasource.snowflake.namedJdbcTemplate}") NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+//        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+//    }
+//
+//    @Override
+//    public Double getTotalRecoveredAmount(
+//            Long agreementId,
+//            String agreementTitle,
+//            String disputeReason,
+//            String vendorCode,
+//            String invoiceNumber,
+//            String po,
+//            String asin,
+//            String businessUnitId,
+//            Date startDate,
+//            Date endDate
+//    ) {
+//        // Validate mandatory parameters
+//        if (businessUnitId == null || startDate == null || endDate == null) {
+//            throw new IllegalArgumentException("Mandatory parameters businessUnitId, startDate, and endDate must not be null");
+//        }
+//
+//        // Base SQL query with mandatory filters
+//        StringBuilder sql = new StringBuilder(RecoveryQueryConstants.TOTAL_RECOVERED_BASE_QUERY);
+//
+//        // Map to hold query parameters
+//        Map<String, Object> params = new HashMap<>();
+//        params.put("businessUnitId", businessUnitId);
+//        params.put("startDate", new java.sql.Date(startDate.getTime()));
+//        params.put("endDate", new java.sql.Date(endDate.getTime()));
+//
+//        // Append optional filters to the SQL query and parameters map
+//        if (agreementId != null) {
+//            sql.append(RecoveryQueryConstants.AGREEMENT_ID_FILTER);
+//            params.put("agreementId", agreementId);
+//        }
+//        if (agreementTitle != null && !agreementTitle.isEmpty()) {
+//            sql.append(RecoveryQueryConstants.AGREEMENT_TITLE_FILTER);
+//            params.put("agreementTitle", agreementTitle);
+//        }
+//        if (disputeReason != null && !disputeReason.isEmpty()) {
+//            sql.append(RecoveryQueryConstants.DISPUTE_REASON_FILTER);
+//            params.put("disputeReason", disputeReason);
+//        }
+//        if (vendorCode != null && !vendorCode.isEmpty()) {
+//            sql.append(RecoveryQueryConstants.VENDOR_CODE_FILTER);
+//            params.put("vendorCode", vendorCode);
+//        }
+//        if (invoiceNumber != null && !invoiceNumber.isEmpty()) {
+//            sql.append(RecoveryQueryConstants.INVOICE_NUMBER_FILTER);
+//            params.put("invoiceNumber", invoiceNumber);
+//        }
+//        if (po != null && !po.isEmpty()) {
+//            sql.append(RecoveryQueryConstants.PO_FILTER);
+//            params.put("po", po);
+//        }
+//        if (asin != null && !asin.isEmpty()) {
+//            sql.append(RecoveryQueryConstants.ASIN_FILTER);
+//            params.put("asin", asin);
+//        }
+//
+//        // Execute the query and retrieve the result
+//        return namedParameterJdbcTemplate.queryForObject(sql.toString(), params, Double.class);
+//    }
+//}
+
+//package com.flywheel.repository.impl;
+//
+//import com.flywheel.constant.RecoveryQueryConstants;
+//import com.flywheel.repository.TotalRecoveredRepository;
+//import org.springframework.beans.factory.annotation.Qualifier;
+//import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+//import org.springframework.stereotype.Repository;
+//
+//import java.util.Date;
+//import java.util.HashMap;
+//import java.util.Map;
+//
+//@Repository
+//public class TotalRecoveredRepositoryImpl implements TotalRecoveredRepository {
+//
+//    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+//
+//    public TotalRecoveredRepositoryImpl(
+//            @Qualifier("defaultJdbcTemplate") NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+//        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+//    }
+//
+//    @Override
+//    public Double getTotalRecoveredAmount(
+//            Long agreementId,
+//            String agreementTitle,
+//            String disputeReason,
+//            String vendorCode,
+//            String invoiceNumber,
+//            String po,
+//            String asin,
+//            String businessUnitId,
+//            Date startDate,
+//            Date endDate
+//    ) {
+//        // Validate mandatory parameters
+//        if (businessUnitId == null || startDate == null || endDate == null) {
+//            throw new IllegalArgumentException("Mandatory parameters businessUnitId, startDate, and endDate must not be null");
+//        }
+//
+//        // Base SQL query with mandatory filters
+//        StringBuilder sql = new StringBuilder(RecoveryQueryConstants.TOTAL_RECOVERED_BASE_QUERY);
+//
+//        // Map to hold query parameters
+//        Map<String, Object> params = new HashMap<>();
+//        params.put("businessUnitId", businessUnitId);
+//        params.put("startDate", new java.sql.Date(startDate.getTime()));
+//        params.put("endDate", new java.sql.Date(endDate.getTime()));
+//
+//        // Append optional filters to the SQL query and parameters map
+//        if (agreementId != null) {
+//            sql.append(RecoveryQueryConstants.AGREEMENT_ID_FILTER);
+//            params.put("agreementId", agreementId);
+//        }
+//        if (agreementTitle != null && !agreementTitle.isEmpty()) {
+//            sql.append(RecoveryQueryConstants.AGREEMENT_TITLE_FILTER);
+//            params.put("agreementTitle", agreementTitle);
+//        }
+//        if (disputeReason != null && !disputeReason.isEmpty()) {
+//            sql.append(RecoveryQueryConstants.DISPUTE_REASON_FILTER);
+//            params.put("disputeReason", disputeReason);
+//        }
+//        if (vendorCode != null && !vendorCode.isEmpty()) {
+//            sql.append(RecoveryQueryConstants.VENDOR_CODE_FILTER);
+//            params.put("vendorCode", vendorCode);
+//        }
+//        if (invoiceNumber != null && !invoiceNumber.isEmpty()) {
+//            sql.append(RecoveryQueryConstants.INVOICE_NUMBER_FILTER);
+//            params.put("invoiceNumber", invoiceNumber);
+//        }
+//        if (po != null && !po.isEmpty()) {
+//            sql.append(RecoveryQueryConstants.PO_FILTER);
+//            params.put("po", po);
+//        }
+//        if (asin != null && !asin.isEmpty()) {
+//            sql.append(RecoveryQueryConstants.ASIN_FILTER);
+//            params.put("asin", asin);
+//        }
+//
+//        // Execute the query and retrieve the result
+//        return namedParameterJdbcTemplate.queryForObject(sql.toString(), params, Double.class);
+//    }
+//}
+
 package com.flywheel.repository.impl;
 
-
-
+import com.flywheel.constant.RecoveryQueryConstants;
 import com.flywheel.repository.TotalRecoveredRepository;
-
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 @Repository
 public class TotalRecoveredRepositoryImpl implements TotalRecoveredRepository {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    public TotalRecoveredRepositoryImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public TotalRecoveredRepositoryImpl(
+            @Qualifier("defaultJdbcTemplate") NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
     @Override
@@ -34,114 +202,54 @@ public class TotalRecoveredRepositoryImpl implements TotalRecoveredRepository {
             Date startDate,
             Date endDate
     ) {
-        StringBuilder queryBuilder = new StringBuilder(
-        "WITH ResolvedDisputes AS (" +
-        "   SELECT" +
-        "       dm.INVOICE_NUMBER," +
-        "       dm.APPROVED_AMOUNT" +
-        "   FROM" +
-        "       DISPUTE_MANAGEMENT dm" +
-        "   WHERE" +
-        "       DISPUTE_STATUS = 'resolved'" +
-        "       AND dm.APPROVED_AMOUNT > 0" +
-        "       AND dm.VC_ACCOUNT_ID IN (" +
-        "           SELECT VC_ACCOUNT_ID" +
-        "           FROM VW_ACCOUNT_MAPPING" +
-        "           WHERE business_unit_id = ?" +
-        "       )" +
-        "       AND dm.DISPUTE_TYPE = 'co-op'" +
-        "       AND dm.DISPUTE_DATE BETWEEN ? AND ?" +
-        (agreementId != null ? " AND dm.AGREEMENT_ID = ?" : "") +
-        (agreementTitle != null && !agreementTitle.isEmpty() ? " AND dm.AGREEMENT_TITLE LIKE CONCAT('%', ?, '%')" : "") +
-        (disputeReason != null && !disputeReason.isEmpty() ? " AND dm.DISPUTE_REASON = ?" : "") +
-        (vendorCode != null && !vendorCode.isEmpty() ? " AND dm.VENDOR_CODE = ?" : "") +
-        (invoiceNumber != null && !invoiceNumber.isEmpty() ? " AND dm.INVOICE_NUMBER = ?" : "") +
-        (po != null && !po.isEmpty() ? " AND dm.PURCHASE_ORDER = ?" : "") +
-        (asin != null && !asin.isEmpty() ? " AND dm.ASIN = ?" : "") +
-        (businessUnitId != null && !businessUnitId.isEmpty() ? " AND dm.BUSINESS_UNIT_ID = ?" : "") +
-        "), Variations AS (" +
-        "   SELECT" +
-        "       INVOICE_NUMBER," +
-        "       APPROVED_AMOUNT," +
-        "       INVOICE_NUMBER || 'R1' AS INVOICE_NUMBER_R1," +
-        "       INVOICE_NUMBER || 'R2' AS INVOICE_NUMBER_R2," +
-        "       INVOICE_NUMBER || 'R3' AS INVOICE_NUMBER_R3" +
-        "   FROM" +
-        "       ResolvedDisputes" +
-        "), MatchingRemittances AS (" +
-        "   SELECT" +
-        "       r.INVOICE_NUMBER," +
-        "       r.AMOUNT_PAID" +
-        "   FROM" +
-        "       REMITTANCE r" +
-        "   JOIN" +
-        "       Variations v" +
-        "   ON" +
-        "       r.INVOICE_NUMBER IN (v.INVOICE_NUMBER_R1, v.INVOICE_NUMBER_R2, v.INVOICE_NUMBER_R3)" +
-        "   WHERE" +
-        "       r.INVOICE_NUMBER LIKE '%R1' OR" +
-        "       r.INVOICE_NUMBER LIKE '%R2' OR" +
-        "       r.INVOICE_NUMBER LIKE '%R3'" +
-        "), TotalRecovered AS (" +
-        "   SELECT" +
-        "       v.INVOICE_NUMBER," +
-        "       v.APPROVED_AMOUNT," +
-        "       COALESCE(SUM(r.AMOUNT_PAID), 0) AS TOTAL_PAID" +
-        "   FROM" +
-        "       Variations v" +
-        "   LEFT JOIN" +
-        "       MatchingRemittances r" +
-        "   ON" +
-        "       r.INVOICE_NUMBER IN (v.INVOICE_NUMBER_R1, v.INVOICE_NUMBER_R2, v.INVOICE_NUMBER_R3)" +
-        "   GROUP BY" +
-        "       v.INVOICE_NUMBER, v.APPROVED_AMOUNT" +
-        ")" +
-        "SELECT" +
-        "   SUM(v.APPROVED_AMOUNT + COALESCE(r.TOTAL_PAID, 0)) AS TOTAL_RECOVERED_AMOUNT" +
-        "FROM" +
-        "   TotalRecovered r" +
-        "JOIN" +
-        "   Variations v" +
-        "ON" +
-        "   r.INVOICE_NUMBER = v.INVOICE_NUMBER");
-
-        List<Object> params = new ArrayList<>();
-        params.add(businessUnitId);
-        params.add(startDate);
-        params.add(endDate);
-
-        if (agreementId != null) {
-            params.add(agreementId);
-        }
-        if (agreementTitle != null && !agreementTitle.isEmpty()) {
-            params.add(agreementTitle);
-        }
-        if (disputeReason != null && !disputeReason.isEmpty()) {
-            params.add(disputeReason);
-        }
-        if (vendorCode != null && !vendorCode.isEmpty()) {
-            params.add(vendorCode);
-        }
-        if (invoiceNumber != null && !invoiceNumber.isEmpty()) {
-            params.add(invoiceNumber);
-        }
-        if (po != null && !po.isEmpty()) {
-            params.add(po);
-        }
-        if (asin != null && !asin.isEmpty()) {
-            params.add(asin);
-        }
-        if (businessUnitId != null && !businessUnitId.isEmpty()) {
-            params.add(businessUnitId);
+        // Validate mandatory parameters
+        if (businessUnitId == null || startDate == null || endDate == null) {
+            throw new IllegalArgumentException("Mandatory parameters businessUnitId, startDate, and endDate must not be null");
         }
 
-        @SuppressWarnings("deprecation")
-		Double totalRecoveredAmount = jdbcTemplate.queryForObject(
-            queryBuilder.toString(),
-            params.toArray(),
-            Double.class
-        );
+        // Start with the base query
+        StringBuilder query = new StringBuilder(RecoveryQueryConstants.TOTAL_RECOVERED_BASE_QUERY);
 
-        return totalRecoveredAmount != null ? totalRecoveredAmount : 0.0;
+        // Create parameters map
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("businessUnitId", businessUnitId);
+        parameters.addValue("startDate", new java.sql.Date(startDate.getTime()));
+        parameters.addValue("endDate", new java.sql.Date(endDate.getTime()));
+
+        // Add filters conditionally
+        addFilterCondition(query, parameters, agreementId,
+                () -> RecoveryQueryConstants.AGREEMENT_ID_FILTER, "agreementId");
+
+        addFilterCondition(query, parameters, agreementTitle,
+                () -> RecoveryQueryConstants.AGREEMENT_TITLE_FILTER, "agreementTitle");
+
+        addFilterCondition(query, parameters, disputeReason,
+                () -> RecoveryQueryConstants.DISPUTE_REASON_FILTER, "disputeReason");
+
+        addFilterCondition(query, parameters, vendorCode,
+                () -> RecoveryQueryConstants.VENDOR_CODE_FILTER, "vendorCode");
+
+        addFilterCondition(query, parameters, invoiceNumber,
+                () -> RecoveryQueryConstants.INVOICE_NUMBER_FILTER, "invoiceNumber");
+
+        addFilterCondition(query, parameters, po,
+                () -> RecoveryQueryConstants.PO_FILTER, "po");
+
+        addFilterCondition(query, parameters, asin,
+                () -> RecoveryQueryConstants.ASIN_FILTER, "asin");
+
+        // Execute the query
+        return namedParameterJdbcTemplate.queryForObject(query.toString(), parameters, Double.class);
+    }
+
+    private void addFilterCondition(StringBuilder query, MapSqlParameterSource parameters, Object filterValue,
+                                    Supplier<String> queryBuilderFunction, String param) {
+        Optional.ofNullable(filterValue).filter(value -> value instanceof String ? !((String) value).isEmpty() : true)
+                .ifPresent(value -> {
+                    query.append(queryBuilderFunction.get());
+                    parameters.addValue(param, value);
+                });
     }
 }
+
+

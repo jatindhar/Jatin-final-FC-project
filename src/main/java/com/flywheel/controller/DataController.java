@@ -21,14 +21,14 @@ public class DataController {
     private DataService dataService;
 
     // Utility method to get the default date range (last 3 months)
-    private Date getDefaultStartDate() {
+    Date getDefaultStartDate() {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MONTH, -3); // Subtract 3 months
         return calendar.getTime();
     }
 
     // Utility method to get the current date
-    private Date getDefaultEndDate() {
+     Date getDefaultEndDate() {
         return new Date();
     }
 
@@ -52,6 +52,8 @@ public class DataController {
         if (endDate == null) {
             endDate = getDefaultEndDate();
         }
+        
+        
 
         // Call service method to get data based on the filters
         return dataService.getAllData(
@@ -67,4 +69,13 @@ public class DataController {
                 endDate
         );
     }
+    
+    @GetMapping("/api/data/check-connection")
+    public String checkDatabaseConnection() {
+        if (dataService.isDatabaseConnected()) {
+            return "Database is connected";
+        } else {
+            return "Database connection failed";
+        }
+}
 }
